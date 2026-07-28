@@ -142,6 +142,7 @@ class MaimaiService:
         official_game_id: str = "MAID",
         official_title_key: str = "SDGB",
         official_interface_enabled: bool = True,
+        runtime_platform: str = "",
     ):
         self.timeout = float(timeout or 30.0)
         self.http_proxy = (http_proxy or "").strip() or None
@@ -159,6 +160,7 @@ class MaimaiService:
         self.official_game_id = (official_game_id or "MAID").strip() or "MAID"
         self.official_title_key = (official_title_key or "SDGB").strip() or "SDGB"
         self.official_interface_enabled = bool(official_interface_enabled)
+        self.runtime_platform = (runtime_platform or sys.platform).strip().lower()
         self._ffi_request_lock = asyncio.Lock()
 
     def _ensure_dependency_versions(self) -> None:
@@ -454,6 +456,8 @@ class MaimaiService:
         return self._score_source_wants_official()
 
     def _score_source_mode(self) -> str:
+        if self.runtime_platform.startswith("linux"):
+            return SCORE_SOURCE_ARCADE
         if self.score_source_mode in SCORE_SOURCE_MODES:
             return self.score_source_mode
         if self.official_protocol_enabled:
